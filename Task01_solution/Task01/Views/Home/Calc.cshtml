@@ -1,0 +1,165 @@
+﻿@{
+    ViewData["Title"] = "Calculator - Ahmed's Club";
+
+    string oddEvenResult = null;
+    string calcResult = null;
+
+    // Odd / Even Checker
+    if (Context.Request.Method == "POST" && Context.Request.Form["action"] == "oddEven")
+    {
+        var numStr = Context.Request.Form["number"];
+        if (int.TryParse(numStr, out int num))
+        {
+            oddEvenResult = (num % 2 == 0) ? $"{num} is Even ✅" : $"{num} is Odd 🔢";
+        }
+        else
+        {
+            oddEvenResult = "Please enter a valid number ❌";
+        }
+    }
+
+    // Calculator
+    if (Context.Request.Method == "POST" && Context.Request.Form["action"] == "calc")
+    {
+        var num1Str = Context.Request.Form["num1"];
+        var num2Str = Context.Request.Form["num2"];
+        var op = Context.Request.Form["op"];
+
+        if (double.TryParse(num1Str, out double n1) && double.TryParse(num2Str, out double n2))
+        {
+            switch (op)
+            {
+                case "+": calcResult = $"{n1} + {n2} = {n1 + n2}"; break;
+                case "-": calcResult = $"{n1} - {n2} = {n1 - n2}"; break;
+                case "*": calcResult = $"{n1} × {n2} = {n1 * n2}"; break;
+                case "/":
+                    calcResult = (n2 == 0) ? "Cannot divide by zero ❌" : $"{n1} ÷ {n2} = {n1 / n2}";
+                    break;
+                default: calcResult = "Unknown operation ❓"; break;
+            }
+        }
+        else
+        {
+            calcResult = "Please enter valid numbers ❌";
+        }
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #0ff;
+            text-shadow: 0 0 15px #0ff, 0 0 30px #f0f;
+        }
+
+        form {
+            margin: 20px auto;
+            padding: 20px;
+            background: #222;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 0 15px #0ff;
+        }
+
+        input, select, button {
+            padding: 8px;
+            margin: 5px 0;
+            width: 90%;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            background: #0ff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            button:hover {
+                background: #00bcd4;
+                color: black;
+            }
+
+        .result {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: lime;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            background: linear-gradient(90deg, #ff0080, #0ff, #ff0);
+            color: black;
+            font-weight: bold;
+            animation: disco 3s infinite linear;
+        }
+
+        @@keyframes disco {
+            0% {
+                background: linear-gradient(90deg, #ff0080, #0ff, #ff0);
+            }
+
+            50% {
+                background: linear-gradient(90deg, #0ff, #ff0, #ff0080);
+            }
+
+            100% {
+                background: linear-gradient(90deg, #ff0, #ff0080, #0ff);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🧮 Ahmed's Calculator</h1>
+
+    <!-- Odd / Even -->
+    <form method="post">
+        <h3>Odd / Even Checker</h3>
+        <input type="number" name="number" placeholder="Enter a number" />
+        <input type="hidden" name="action" value="oddEven" />
+        <button type="submit">Check</button>
+        @if (oddEvenResult != null)
+        {
+            <div class="result">@oddEvenResult</div>
+        }
+    </form>
+
+    <!-- Calculator -->
+    <form method="post">
+        <h3>Basic Calculator</h3>
+        <input type="number" name="num1" placeholder="First number" />
+        <select name="op">
+            <option value="+">+</option>
+            <option value="-">-</option>
+            <option value="*">×</option>
+            <option value="/">÷</option>
+        </select>
+        <input type="number" name="num2" placeholder="Second number" />
+        <input type="hidden" name="action" value="calc" />
+        <button type="submit">Calculate</button>
+        @if (calcResult != null)
+        {
+            <div class="result">@calcResult</div>
+        }
+    </form>
+
+    <footer> 🎶 Ahmed's Club Tools </footer>
+</body>
+</html>

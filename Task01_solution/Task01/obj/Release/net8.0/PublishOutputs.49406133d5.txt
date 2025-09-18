@@ -1,0 +1,7 @@
+C:\DEPI\MVC\Day01\MVC_Done_Assingment_Day_01\Task01_solution\Task01\obj\Release\net8.0\PubTmp\Out\Task01.exe
+C:\DEPI\MVC\Day01\MVC_Done_Assingment_Day_01\Task01_solution\Task01\obj\Release\net8.0\PubTmp\Out\appsettings.Development.json
+C:\DEPI\MVC\Day01\MVC_Done_Assingment_Day_01\Task01_solution\Task01\obj\Release\net8.0\PubTmp\Out\appsettings.json
+C:\DEPI\MVC\Day01\MVC_Done_Assingment_Day_01\Task01_solution\Task01\obj\Release\net8.0\PubTmp\Out\Task01.dll
+C:\DEPI\MVC\Day01\MVC_Done_Assingment_Day_01\Task01_solution\Task01\obj\Release\net8.0\PubTmp\Out\Task01.deps.json
+C:\DEPI\MVC\Day01\MVC_Done_Assingment_Day_01\Task01_solution\Task01\obj\Release\net8.0\PubTmp\Out\Task01.runtimeconfig.json
+C:\DEPI\MVC\Day01\MVC_Done_Assingment_Day_01\Task01_solution\Task01\obj\Release\net8.0\PubTmp\Out\Task01.pdb

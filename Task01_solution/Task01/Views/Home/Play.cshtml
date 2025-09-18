@@ -1,0 +1,460 @@
+﻿@{
+    ViewData["Title"] = "Ahmed's Disco Club - Tic Tac Toe";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/disco-game.css" />
+
+@functions {
+    public class TicTacToeGame
+    {
+        private char[,] board = new char[3, 3];
+        private bool gameEnded = false;
+        private string winner = "";
+
+        public TicTacToeGame()
+        {
+            InitializeBoard();
+        }
+
+        public void InitializeBoard()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    board[i, j] = ' ';
+                }
+            }
+            gameEnded = false;
+            winner = "";
+        }
+
+        public bool MakeMove(int row, int col, char player)
+        {
+            if (board[row, col] == ' ' && !gameEnded)
+            {
+                board[row, col] = player;
+                return true;
+            }
+            return false;
+        }
+
+        public string CheckWinner()
+        {
+            // Check rows
+            for (int i = 0; i < 3; i++)
+            {
+                if (board[i, 0] != ' ' && board[i, 0] == board[i, 1] && board[i, 1] == board[i, 2])
+                {
+                    gameEnded = true;
+                    return board[i, 0].ToString();
+                }
+            }
+
+            // Check columns
+            for (int j = 0; j < 3; j++)
+            {
+                if (board[0, j] != ' ' && board[0, j] == board[1, j] && board[1, j] == board[2, j])
+                {
+                    gameEnded = true;
+                    return board[0, j].ToString();
+                }
+            }
+
+            // Check diagonals
+            if (board[0, 0] != ' ' && board[0, 0] == board[1, 1] && board[1, 1] == board[2, 2])
+            {
+                gameEnded = true;
+                return board[0, 0].ToString();
+            }
+
+            if (board[0, 2] != ' ' && board[0, 2] == board[1, 1] && board[1, 1] == board[2, 0])
+            {
+                gameEnded = true;
+                return board[0, 2].ToString();
+            }
+
+            // Check for tie
+            bool boardFull = true;
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (board[i, j] == ' ')
+                    {
+                        boardFull = false;
+                        break;
+                    }
+                }
+                if (!boardFull) break;
+            }
+
+            if (boardFull && !gameEnded)
+            {
+                gameEnded = true;
+                return "T";
+            }
+
+            return "";
+        }
+
+        public int[] GetBestMove()
+        {
+            int bestScore = int.MinValue;
+            int[] bestMove = new int[2];
+
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (board[i, j] == ' ')
+                    {
+                        board[i, j] = 'O';
+                        int score = Minimax(0, false);
+                        board[i, j] = ' ';
+
+                        if (score > bestScore)
+                        {
+                            bestScore = score;
+                            bestMove[0] = i;
+                            bestMove[1] = j;
+                        }
+                    }
+                }
+            }
+
+            return bestMove;
+        }
+
+        private int Minimax(int depth, bool isMaximizing)
+        {
+            string result = CheckWinner();
+
+            if (result == "O") return 10 - depth;
+            if (result == "X") return depth - 10;
+            if (result == "T") return 0;
+
+            if (isMaximizing)
+            {
+                int bestScore = int.MinValue;
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (board[i, j] == ' ')
+                        {
+                            board[i, j] = 'O';
+                            int score = Minimax(depth + 1, false);
+                            board[i, j] = ' ';
+                            bestScore = Math.Max(score, bestScore);
+                        }
+                    }
+                }
+                return bestScore;
+            }
+            else
+            {
+                int bestScore = int.MaxValue;
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (board[i, j] == ' ')
+                        {
+                            board[i, j] = 'X';
+                            int score = Minimax(depth + 1, true);
+                            board[i, j] = ' ';
+                            bestScore = Math.Min(score, bestScore);
+                        }
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        public char GetCellValue(int row, int col)
+        {
+            return board[row, col];
+        }
+
+        public bool IsGameEnded()
+        {
+            return gameEnded;
+        }
+    }
+}
+
+<!-- Intro Screen -->
+<div class="intro-screen">
+    <div class="intro-text">WELCOME TO THE CLUB!</div>
+    <div class="intro-subtitle">Get ready to play...</div>
+</div>
+
+<!-- Game Container -->
+<div class="game-container">
+    <h1 class="game-title">🎮 DISCO TIC TAC TOE 🎮</h1>
+
+    <div class="game-status" id="gameStatus">Your turn! Click a cell to play</div>
+
+    <div class="game-board" id="gameBoard">
+        @for (int i = 0; i < 3; i++)
+        {
+            @for (int j = 0; j < 3; j++)
+            {
+                <button class="cell" onclick="makeMove(@i, @j)" id="cell-@i-@j"></button>
+            }
+        }
+    </div>
+
+    <button class="reset-btn" onclick="resetGame()">🎲 NEW GAME 🎲</button>
+    <button class="reset-btn" onclick="showFinal()" style="background: linear-gradient(45deg, #06ffa5, #3a86ff);">🎉 FINISH & CELEBRATE 🎉</button>
+</div>
+
+<!-- Celebration Overlay -->
+<div class="celebration" id="celebration">
+    <div class="fireworks">
+        <div class="firework"></div>
+        <div class="firework"></div>
+        <div class="firework"></div>
+        <div class="firework"></div>
+    </div>
+    <div class="celebration-text" id="celebrationText">YOU WIN!</div>
+    <button class="reset-btn" onclick="hideCelebration()">🎮 PLAY AGAIN 🎮</button>
+</div>
+
+<!-- Final Screen -->
+<div class="final-screen" id="finalScreen">
+    <div class="club-name">AHMED'S CLUB</div>
+    <button class="reset-btn" onclick="backToGame()" style="background: linear-gradient(45deg, #ff006e, #8338ec);">🎮 BACK TO GAME 🎮</button>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-content">
+        <h3>🎪 AHMED'S DISCO CLUB 🎪</h3>
+        <p>Where gaming meets the dance floor!</p>
+        <p>Experience the ultimate fusion of classic games and disco vibes</p>
+        <div class="social-links">
+            <a href="#">🎵 Music</a>
+            <a href="#">🎮 Games</a>
+            <a href="#">🕺 Dance</a>
+            <a href="#">🎉 Party</a>
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.6;">
+            © 2024 Ahmed's Club. All rights reserved. Let the games begin! 🎊
+        </p>
+    </div>
+</footer>
+
+<script>
+    let gameBoard = [
+        [' ', ' ', ' '],
+        [' ', ' ', ' '],
+        [' ', ' ', ' ']
+    ];
+    let gameEnded = false;
+    let currentPlayer = 'X';
+
+    function makeMove(row, col) {
+        if (gameBoard[row][col] !== ' ' || gameEnded) {
+            return;
+        }
+
+        // Player move
+        gameBoard[row][col] = 'X';
+        updateCell(row, col, 'X');
+
+        let winner = checkWinner();
+        if (winner) {
+            endGame(winner);
+            return;
+        }
+
+        // AI move
+        setTimeout(() => {
+            let aiMove = getBestMove();
+            if (aiMove) {
+                gameBoard[aiMove[0]][aiMove[1]] = 'O';
+                updateCell(aiMove[0], aiMove[1], 'O');
+
+                winner = checkWinner();
+                if (winner) {
+                    endGame(winner);
+                }
+            }
+        }, 500);
+    }
+
+    function updateCell(row, col, player) {
+        const cell = document.getElementById(`cell-${row}-${col}`);
+        cell.textContent = player;
+        cell.classList.add(player.toLowerCase());
+        cell.disabled = true;
+    }
+
+    function checkWinner() {
+        // Check rows
+        for (let i = 0; i < 3; i++) {
+            if (gameBoard[i][0] !== ' ' && gameBoard[i][0] === gameBoard[i][1] && gameBoard[i][1] === gameBoard[i][2]) {
+                return gameBoard[i][0];
+            }
+        }
+
+        // Check columns
+        for (let j = 0; j < 3; j++) {
+            if (gameBoard[0][j] !== ' ' && gameBoard[0][j] === gameBoard[1][j] && gameBoard[1][j] === gameBoard[2][j]) {
+                return gameBoard[0][j];
+            }
+        }
+
+        // Check diagonals
+        if (gameBoard[0][0] !== ' ' && gameBoard[0][0] === gameBoard[1][1] && gameBoard[1][1] === gameBoard[2][2]) {
+            return gameBoard[0][0];
+        }
+
+        if (gameBoard[0][2] !== ' ' && gameBoard[0][2] === gameBoard[1][1] && gameBoard[1][1] === gameBoard[2][0]) {
+            return gameBoard[0][2];
+        }
+
+        // Check for tie
+        let boardFull = true;
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (gameBoard[i][j] === ' ') {
+                    boardFull = false;
+                    break;
+                }
+            }
+            if (!boardFull) break;
+        }
+
+        if (boardFull) {
+            return 'T';
+        }
+
+        return null;
+    }
+
+    function getBestMove() {
+        let bestScore = -Infinity;
+        let bestMove = null;
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (gameBoard[i][j] === ' ') {
+                    gameBoard[i][j] = 'O';
+                    let score = minimax(0, false);
+                    gameBoard[i][j] = ' ';
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = [i, j];
+                    }
+                }
+            }
+        }
+
+        return bestMove;
+    }
+
+    function minimax(depth, isMaximizing) {
+        let result = checkWinner();
+
+        if (result === 'O') return 10 - depth;
+        if (result === 'X') return depth - 10;
+        if (result === 'T') return 0;
+
+        if (isMaximizing) {
+            let bestScore = -Infinity;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (gameBoard[i][j] === ' ') {
+                        gameBoard[i][j] = 'O';
+                        let score = minimax(depth + 1, false);
+                        gameBoard[i][j] = ' ';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+            }
+            return bestScore;
+        } else {
+            let bestScore = Infinity;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (gameBoard[i][j] === ' ') {
+                        gameBoard[i][j] = 'X';
+                        let score = minimax(depth + 1, true);
+                        gameBoard[i][j] = ' ';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+            }
+            return bestScore;
+        }
+    }
+
+    function endGame(winner) {
+        gameEnded = true;
+        const celebration = document.getElementById('celebration');
+        const celebrationText = document.getElementById('celebrationText');
+
+        if (winner === 'X') {
+            celebrationText.textContent = '🎉 YOU WIN! 🎉';
+            celebrationText.classList.remove('lose');
+        } else if (winner === 'O') {
+            celebrationText.textContent = '🤖 AI WINS! 🤖';
+            celebrationText.classList.add('lose');
+        } else {
+            celebrationText.textContent = '🤝 IT\'S A TIE! 🤝';
+            celebrationText.classList.remove('lose');
+        }
+
+        celebration.classList.add('show');
+
+        // Update status
+        document.getElementById('gameStatus').textContent =
+            winner === 'X' ? '🎉 Congratulations! You won!' :
+            winner === 'O' ? '🤖 AI wins this round!' :
+            '🤝 It\'s a tie game!';
+    }
+
+    function hideCelebration() {
+        document.getElementById('celebration').classList.remove('show');
+        resetGame();
+    }
+
+    function resetGame() {
+        gameBoard = [
+            [' ', ' ', ' '],
+            [' ', ' ', ' '],
+            [' ', ' ', ' ']
+        ];
+        gameEnded = false;
+
+        // Reset all cells
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const cell = document.getElementById(`cell-${i}-${j}`);
+                cell.textContent = '';
+                cell.className = 'cell';
+                cell.disabled = false;
+            }
+        }
+
+        document.getElementById('gameStatus').textContent = 'Your turn! Click a cell to play';
+    }
+
+    function showFinal() {
+        document.getElementById('finalScreen').classList.add('show');
+    }
+
+    function backToGame() {
+        document.getElementById('finalScreen').classList.remove('show');
+    }
+
+    // Initialize game
+    document.addEventListener('DOMContentLoaded', function() {
+        resetGame();
+    });
+</script>
